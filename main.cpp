@@ -63,5 +63,6 @@ int main(int argc,char ** argv){
   // - Całeczka jakaś powalona, mogą sobie najpierw sparsować wyrażenie regexem xD tylko będzie musiał byc wielomian bo bądźmy ludźmi
   // - Monte carlo na kole - mogą to potem sobie uśrednić między wątkami, można porównać dokładność ze zmienną z math.h
   // - coś z promise i packaged_task
+  // - Znajdowanie k liczb pierwszych -> trzeba im powiedzieć że inkrementacja zmiennej jest atomowa xD (volatile) (może ranges wcisne, tylko musze pomyśleć)
 }
   
