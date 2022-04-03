@@ -34,6 +34,8 @@ void createRandomTree(fs::path root, std::default_random_engine &engine,
   }
 }
 
+// Solution
+
 using EncryptFunction = std::string (*)(const std::string &data,
                                         unsigned char key);
 
@@ -72,13 +74,16 @@ void encryptDirectory(fs::path root, unsigned char key) {
       std::packaged_task<void(std::string, EncryptFunction, unsigned char)>
           task(encrypt);
       encryptionFutures.push_back(task.get_future());
-      task(filename,ceasars,key);
+      task(filename, ceasars, key);
     }
   }
-  for(auto & enc : encryptionFutures){
+  for (auto &enc : encryptionFutures) {
     enc.get();
   }
 }
+
+// Twoim zadaniem jest jak najszybsze zaszyfrowanie folderu z wrażliwymi danymi
+// Za pomocą szyfru cezara zaszyfruj wszystkie pliki w folderze fsroot, użyj wielowątkowości
 
 int main() {
   std::default_random_engine engine(7312);

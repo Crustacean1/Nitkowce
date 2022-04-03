@@ -40,8 +40,9 @@ double parallelMonteCarlo(size_t threadCount, size_t iterationCount) {
   return result / (double)threadCount;
 }
 
-// Compute pi in 10 million iterations of monte carlo - then compare sequential
-// and parallel execution times You may use packaged_task
+// Oblicz pi w 100 iteracjach algorytmu monte carlo następnie porównaj
+// dokładność wersji jednowątkowej z wielowątkową, wykorzystaj std::packaged_task
+//
 
 int main(int argc, char **argv) {
   std::cout.precision(24);

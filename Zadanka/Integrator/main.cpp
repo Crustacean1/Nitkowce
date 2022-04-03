@@ -25,6 +25,8 @@ PolyTerm toTerm(const std::string &coefficient, const std::string &power) {
   };
 }
 
+//Solution
+
 // Assuming integer coefficients
 
 std::vector<PolyTerm> extractTerms(const std::string &str) {
@@ -87,6 +89,10 @@ double integrate(const std::vector<PolyTerm> &polynomial, size_t noOfThreads,
   }
   return result;
 }
+
+// Otrzymasz string z wielomianem postaci ax^b + cx^d + ...
+// Twoim zadaniem jest jego numeryczne zcałkowanie z użyciem współbieżności
+// do tego celu użyj std::promise
 
 int main(int argc, char **argv) {
   auto terms = extractTerms("12x+8x");
