@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <fstream>
+#include <future>
 #include <iostream>
 #include <math.h>
 #include <random>
@@ -96,7 +97,7 @@ void createRoot() {
   createRandomTree(rootPath, engine, 3, true);
 }
 
-//Solution
+// Solution
 
 double sqrDist(double x, double y) { return pow(x, 2) + pow(y, 2); }
 
@@ -120,7 +121,7 @@ bool isTriangleValid(std::smatch match) {
                          std::atof(std::string(match[6]).c_str()));
 }
 
-bool isValidFile(const std::string &filename) {
+std::string isValidFile(const std::string &filename) {
   std::ifstream file(filename);
   std::string line;
   std::string number = "(-?[0-9]+\\.-?[0-9]+)";
@@ -136,19 +137,29 @@ bool isValidFile(const std::string &filename) {
     }
     if (std::regex_match(line, match, triangle)) {
       if (!isTriangleValid(match)) {
-        return false;
+        return filename;
       }
     }
   }
-  return true;
+  return "";
 }
 
 void findImpostor(fs::path root) {
+  std::vector<std::future<std::string>> validity;
   for (auto &file : fs::recursive_directory_iterator(root)) {
     if (fs::is_regular_file(file)) {
-      if (!isValidFile(file.path())) {
-         std::cout<<"Suspicious: "<<file.path()<<std::endl;
-      }
+      std::future<std::string> fut = std::async(
+          std::launch::async, &isValidFile, std::string(file.path()));
+      validity.emplace_back(std::move(fut));
+      /*if(isValidFile(std::string(file.path())) != ""){
+        std::cout<<file.path()<<std::endl;
+      }*/
+    }
+  }
+  for (std::future<std::string> &file : validity) {
+    std::string result = file.get();
+    if (result != "") {
+      std::cout << "Invalid file: " << result << std::endl;
     }
   }
 }
@@ -156,7 +167,8 @@ void findImpostor(fs::path root) {
 // Zadanie trójkąty
 // Przeszukaj rekurencyjnie wygenerowany folder, w środku znajdują się pliki,
 // w każdym z nich znajduje się kilka linijek postaci triangle[(,),(,),(,)]
-// w sposób współbieżny znajdż plik ze skorumpowanym trójkątem -> takim który nie jest prosty
+// w sposób współbieżny znajdż plik ze skorumpowanym trójkątem -> takim który
+// nie jest prosty
 
 int main(int argc, char **argv) {
   createRoot();
@@ -164,4 +176,3 @@ int main(int argc, char **argv) {
   findImpostor(root);
   return 0;
 }
-
