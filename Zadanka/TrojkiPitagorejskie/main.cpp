@@ -23,7 +23,7 @@ int genPitTrip(int step,int offset){
       }
     }
   } 
-  std::cout<<"Found: "<<findings<<"triplets"<<std::endl;
+  std::cout<<"Found: "<<findings<<" triplets"<<std::endl;
   return findings;
 }
 
