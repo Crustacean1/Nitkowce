@@ -5,18 +5,10 @@
 #include <math.h>
 #include <chrono>
 #include <vector>
+#include "Timer.hpp"
 
-int bigNumber = 100000;
-
-using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
-TimePoint startTimer(){
-  return std::chrono::system_clock::now();
-}
-
-double resetTimer(TimePoint point){
-  return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - point).count();
-}
-
+#define bigNumber 100000
+//int bigNumber = 100000;
 
 int genPitTrip(int step,int offset){
   int findings = 0;
@@ -40,23 +32,29 @@ int genPitTrip(int step,int offset){
 int main(int argc,char ** argv){
   std::cout<<""<<std::endl;
   auto pitTriple = std::async(std::launch::async,genPitTrip,1,1);
-  auto startTime = startTimer();
-  auto normalSum = pitTriple.get();
-  std::cout<<"after: "<<resetTimer(startTime)<<" milliseconds found: "<<normalSum<<" triplets"<<std::endl;
+  {
+    int normalSum;
+    Timer timer(normalSum);
+  //  auto startTime = startTimer();
+    normalSum = pitTriple.get();
+//    std::cout << "after: " << resetTimer(startTime) << " milliseconds found: " << normalSum << " triplets" << std::endl;
+  }
 
   int cores = std::thread::hardware_concurrency();
   std::cout<<"System has: "<<cores<<" cores"<<std::endl;
 
   std::vector<std::future<int>> futures;
-  startTime = startTimer();
   for(int i = 0;i<cores;++i){
     futures.push_back(std::async(std::launch::async,genPitTrip,cores,i+1));
   }
-  int threadSum = 0;
-  for(int i = 0;i<cores;++i){
-    threadSum += futures[i].get();
+  {
+    int threadSum = 0;
+    Timer timer(threadSum);
+    for (int i = 0; i < cores; ++i) {
+      threadSum += futures[i].get();
+    }
+ //   std::cout << "after: " << resetTimer(startTime) << " milliseconds found: " << threadSum << " triplets" << std::endl;
   }
-  std::cout<<"after: "<<resetTimer(startTime)<<" milliseconds found: "<<threadSum<<" triplets"<<std::endl;
 
 }
   
