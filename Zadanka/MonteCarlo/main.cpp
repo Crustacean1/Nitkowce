@@ -3,8 +3,13 @@
 #include <iostream>
 #include <random>
 
+bool isInsideCircle(double x,double y){
+  return x*x + y*y <= 1.0;
+}
+
+//Checks if random point in square is contained by quartercircle with origin in center...
 double monteCarloPi(size_t seed, size_t iterationCount) {
-  std::default_random_engine engine(std::chrono::system_clock().now().time_since_epoch().count() + seed);
+  std::default_random_engine engine(std::chrono::system_clock().now().time_since_epoch().count() + seed);//Figure is seed is really needed...
   size_t successCount = 0;
   std::uniform_real_distribution<double> dist(0, 1);
   double x, y;
@@ -12,7 +17,7 @@ double monteCarloPi(size_t seed, size_t iterationCount) {
   for (size_t i = 0; i < iterationCount; ++i) {
     x = dist(engine);
     y = dist(engine);
-    if (x * x + y * y <= 1) {
+    if (isInsideCircle(x,y)) {
       ++successCount;
     }
   }
@@ -42,7 +47,7 @@ double parallelMonteCarlo(size_t threadCount, size_t iterationCount) {
 
 // Oblicz pi w 100 iteracjach algorytmu monte carlo następnie porównaj
 // dokładność wersji jednowątkowej z wielowątkową, wykorzystaj std::packaged_task
-//
+// std::cout.precision(n) pomoże w wyświetlaniu cyfr z dużą dokładnośćią
 
 int main(int argc, char **argv) {
   std::cout.precision(24);
