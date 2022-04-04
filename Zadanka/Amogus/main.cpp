@@ -100,12 +100,13 @@ void createRandomTree(fs::path root, std::default_random_engine &engine,
   }
 }
 
-void createRoot() {
+fs::path initializeEnvironment(const std::string &folder) {
   std::default_random_engine engine(471576);
-  auto rootPath = fs::current_path() / "fsroot";
+  auto rootPath = fs::current_path() / folder;
   fs::remove_all(rootPath);
   fs::create_directory(rootPath);
   createRandomTree(rootPath, engine, 3, true);
+  return rootPath;
 }
 
 // Solution
@@ -181,8 +182,8 @@ void findImpostor(fs::path root) {
 // nie jest prosty
 
 int main(int argc, char **argv) {
-  createRoot();
-  auto root = fs::current_path() / "fsroot";
+  auto root = initializeEnvironment("fsroot");
+
   findImpostor(root);
   return 0;
 }
