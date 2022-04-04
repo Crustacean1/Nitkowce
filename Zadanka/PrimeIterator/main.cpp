@@ -151,9 +151,6 @@ void findImpostor(fs::path root) {
       std::future<std::string> fut = std::async(
           std::launch::async, &isValidFile, std::string(file.path()));
       validity.emplace_back(std::move(fut));
-      /*if(isValidFile(std::string(file.path())) != ""){
-        std::cout<<file.path()<<std::endl;
-      }*/
     }
   }
   for (std::future<std::string> &file : validity) {

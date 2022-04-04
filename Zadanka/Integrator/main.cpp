@@ -25,14 +25,13 @@ PolyTerm toTerm(const std::string &coefficient, const std::string &power) {
   };
 }
 
-//Solution
+// Solution
 
-// Assuming integer coefficients
-
-std::vector<PolyTerm> extractTerms(const std::string &str) {
+std::vector<PolyTerm> extractTerms(std::string str) {
   std::vector<PolyTerm> result;
   std::string baseTermExp = "(-?[0-9]*)x(\\^(-?[0-9]*))?";
-  std::regex termReg("\\+" + baseTermExp);
+  std::regex termReg(baseTermExp + "\\+");
+  str += "+";
 
   std::sregex_token_iterator iterator(str.begin(), str.end(), termReg, {1, 3});
 
@@ -40,15 +39,6 @@ std::vector<PolyTerm> extractTerms(const std::string &str) {
     std::string coeff = *iterator++;
     std::string power = *iterator++;
     result.push_back(toTerm(coeff, power));
-  }
-
-  std::regex firstReg(baseTermExp + "\\+.*");
-  std::smatch firstTerm;
-
-  if (std::regex_match(str, firstTerm, firstReg)) {
-    result.push_back(toTerm(firstTerm[1], firstTerm[3]));
-  } else {
-    throw std::runtime_error("Invalid expression");
   }
 
   return result;
@@ -90,19 +80,21 @@ double integrate(const std::vector<PolyTerm> &polynomial, size_t noOfThreads,
   return result;
 }
 
-// Otrzymasz string z wielomianem postaci ax^b + cx^d + ...
-// Twoim zadaniem jest jego numeryczne zcałkowanie z użyciem współbieżności
-// do tego celu użyj std::promise
+// Otrzymasz string z wielomianem postaci (ax^b + cx^d + ...) z całkowitymi
+// współczynnikami i potęgami oraz bez stałych Należy sparsować go za pomocą
+// wyrażeń typu regex do postaci std::vector<PolyTerm>. Następnie z użyciem
+// funkcji computePolynomial zcałkuj go numerycznie na przedziale -5, 5 z
+// wykorzystaniem wielowątkowości do tego celu użyj std::promise
 
 int main(int argc, char **argv) {
-  auto terms = extractTerms("12x+8x");
+  auto terms = extractTerms("12x^3+8x+4x^7");
   for (const auto &term : terms) {
     std::cout << term.coeff << "y ^ " << term.power << " + ";
   }
   std::cout << std::endl;
 
   std::cout << "Integral: "
-            << integrate(terms, std::thread::hardware_concurrency(), -3, 3,
-                         0.000001);
+            << integrate(terms, std::thread::hardware_concurrency(), -5, 5,
+                         0.0000001);
   return 0;
 }
