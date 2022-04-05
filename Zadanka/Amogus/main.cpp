@@ -109,81 +109,18 @@ fs::path initializeEnvironment(const std::string &folder) {
   return rootPath;
 }
 
-// Solution
-
-double sqrDist(double x, double y) { return pow(x, 2) + pow(y, 2); }
-
-bool isTriangleValid(double x1, double y1, double x2, double y2, double x3,
-                     double y3) {
-  auto a = sqrDist(x1 - x2, y1 - y2);
-  auto b = sqrDist(x2 - x3, y2 - y3);
-  auto c = sqrDist(x3 - x1, y3 - y1);
-
-  bool valid = abs((a + b) - c) < epsilon || abs((a + c) - b) < epsilon ||
-               abs((c + b) - a) < epsilon;
-  return valid;
-}
-
-bool isTriangleValid(std::smatch match) { // Clunky...
-  return isTriangleValid(std::atof(std::string(match[1]).c_str()),
-                         std::atof(std::string(match[2]).c_str()),
-                         std::atof(std::string(match[3]).c_str()),
-                         std::atof(std::string(match[4]).c_str()),
-                         std::atof(std::string(match[5]).c_str()),
-                         std::atof(std::string(match[6]).c_str()));
-}
-
-std::string isValidFile(const std::string &filename) {
-  std::ifstream file(filename);
-  std::string line;
-  std::string number = "(-?[0-9]+\\.-?[0-9]+)";
-  std::string numberPair = "\\(" + number + "," + number + "\\)";
-  std::regex triangle("triangle\\[" + numberPair + "," + numberPair + "," +
-                      numberPair + "\\]");
-  std::smatch match;
-
-  size_t linePos = 0;
-  while (file) {
-    getline(file, line);
-    if (!file) {
-      break;
-    }
-    if (std::regex_match(line, match, triangle)) {
-      if (!isTriangleValid(match)) {
-        return filename + " at: " + std::to_string(linePos);
-      }
-    }
-    ++linePos;
-  }
-  return "";
-}
-
-void findImpostor(fs::path root) {
-  std::vector<std::future<std::string>> validity;
-  for (auto &file : fs::recursive_directory_iterator(root)) {
-    if (fs::is_regular_file(file)) {
-      std::future<std::string> fut = std::async(
-          std::launch::async, &isValidFile, std::string(file.path()));
-      validity.emplace_back(std::move(fut));
-    }
-  }
-  for (std::future<std::string> &file : validity) {
-    std::string result = file.get();
-    if (result != "") {
-      std::cout << "Sus file: " << result << std::endl;
-    }
-  }
-}
-
 // Zadanie trójkąty
 // Przeszukaj rekurencyjnie wygenerowany folder, w środku znajdują się pliki,
 // w każdym z nich znajduje się kilka linijek postaci triangle[(,),(,),(,)]
 // w sposób współbieżny znajdż plik ze skorumpowanym trójkątem -> takim który
 // nie jest prosty
 
-int main(int argc, char **argv) {
+void exercise5() {
   auto root = initializeEnvironment("fsroot");
 
-  findImpostor(root);
-  return 0;
+  // Miejsce na rozwiązanie
+}
+
+int main(){
+  exercise5();
 }

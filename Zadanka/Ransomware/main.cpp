@@ -49,63 +49,17 @@ fs::path initializeEnvironment(const std::string &folderName) {
   return rootPath;
 }
 
-// Solution
-
-using EncryptFunction = std::string (*)(const std::string &data,
-                                        unsigned char key);
-
-void encrypt(const std::string &filename, EncryptFunction func,
-             unsigned char key) {
-  std::ifstream input(filename);
-  if (!input) {
-    return;
-  }
-  std::string content, buffer;
-  while (input >> buffer) {
-    content += buffer;
-  }
-  auto encrypted = func(content, key);
-  input.close();
-  std::ofstream output(filename);
-  if (!output) {
-    return;
-  }
-  output << encrypted;
-}
-
-std::string ceasars(const std::string &buffer, unsigned char key) {
-  auto encoded =
-      buffer | std::views::transform([key](char chr) { return chr + key; });
-  return std::string(encoded.begin(), encoded.end());
-}
-
-void encryptDirectory(fs::path root, unsigned char key) {
-  std::vector<std::future<void>> encryptionFutures;
-
-  for (auto &dirIt : fs::recursive_directory_iterator(root)) {
-    if (dirIt.is_regular_file()) {
-      std::string filename = dirIt.path();
-      std::cout << "Found regular file at: " << filename << std::endl;
-      std::packaged_task<void(std::string, EncryptFunction, unsigned char)>
-          task(encrypt);
-      encryptionFutures.push_back(task.get_future());
-      task(filename, ceasars, key);
-    }
-  }
-  for (auto &enc : encryptionFutures) {
-    enc.get();
-  }
-}
-
 // Twoim zadaniem jest jak najszybsze zaszyfrowanie folderu z wrażliwymi danymi
 // Za pomocą szyfru cezara(skorzystaj z std::ranges) zaszyfruj wszystkie pliki w folderze fsroot, użyj
 // wielowątkowości(std::packaged_task może się przydać)
 // PS. Mam nadzieje że w folderze z projektem nie macie żadnego ważnego folderu nazwanego fsroot...
 
-int main() {
+void exercise4(){
   auto rootPath = initializeEnvironment("fsroot");
-  encryptDirectory(rootPath, 25);
-  // encryptDirectory(rootPath, 231); // Reversing 'encryption'
+  //Miejsce na rozwiązanie
+}
 
+int main() {
+  exercise4();
   return 0;
 }
