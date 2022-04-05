@@ -1,60 +1,55 @@
-#include <iostream>
+#include "Timer.hpp"
+#include <chrono>
 #include <future>
+#include <iostream>
+#include <math.h>
 #include <thread>
 #include <tuple>
-#include <math.h>
-#include <chrono>
 #include <vector>
-#include "Timer.hpp"
 
-#define bigNumber 100000
-//int bigNumber = 100000;
+int bigNumber = 10;
 
-int genPitTrip(int step,int offset){
+struct Triple {
+  int a;
+  int b;
+  int c;
+};
+
+std::vector<Triple> genPitTrip(int step, int offset) {
   int findings = 0;
-  for(int i = offset;findings< (bigNumber + step - 1)/step;i += step){
-    for(int j = 1;j<i;++j){
+  std::vector<Triple> result;
+  for (int i = offset; findings < (bigNumber + step - 1) / step; i += step) {
+    for (int j = 1; j < i; ++j) {
       int potentialSquare = i * i + j * j;
       int root = sqrt(potentialSquare);
-      if(root * root == potentialSquare){
-        //std::cout<<i<<" "<<j<<" "<<potentialSquare<<std::endl;
+      if (root * root == potentialSquare) {
         ++findings;
-        //return std::make_tuple(i,j);
+        result.push_back({i * i, j * j, root * root});
       }
     }
-  } 
-  std::cout<<"Found: "<<findings<<" triplets"<<std::endl;
-  return findings;
+  }
+  return result;
+  ;
 }
 
-
-
-int main(int argc,char ** argv){
-  std::cout<<""<<std::endl;
-  auto pitTriple = std::async(std::launch::async,genPitTrip,1,1);
-  {
-    int normalSum;
-    Timer timer(normalSum);
-  //  auto startTime = startTimer();
-    normalSum = pitTriple.get();
-//    std::cout << "after: " << resetTimer(startTime) << " milliseconds found: " << normalSum << " triplets" << std::endl;
-  }
+int main(int argc, char **argv) {
+  std::cout << "" << std::endl;
 
   int cores = std::thread::hardware_concurrency();
-  std::cout<<"System has: "<<cores<<" cores"<<std::endl;
+  std::cout << "System has: " << cores << " cores" << std::endl;
 
-  std::vector<std::future<int>> futures;
-  for(int i = 0;i<cores;++i){
-    futures.push_back(std::async(std::launch::async,genPitTrip,cores,i+1));
+  std::vector<std::future<std::vector<Triple>>> futures;
+  for (int i = 0; i < 2; ++i) {
+    futures.push_back(std::async(std::launch::async, genPitTrip, 2, i + 1));
   }
-  {
-    int threadSum = 0;
-    Timer timer(threadSum);
-    for (int i = 0; i < cores; ++i) {
-      threadSum += futures[i].get();
+  for (int i = 0; i < futures.size(); ++i) {
+    auto triples = futures[i].get();
+    for (int j = 0; j < triples.size(); ++j) {
+      std::cout << "Triplet: " << triples[j].a << "\t" << triples[j].b << "\t"
+                << triples[j].c << std::endl;
     }
- //   std::cout << "after: " << resetTimer(startTime) << " milliseconds found: " << threadSum << " triplets" << std::endl;
+    std::cout<<"Sep"<<std::endl;
   }
-
+  //   std::cout << "after: " << resetTimer(startTime) << " milliseconds
+  //   found: " << threadSum << " triplets" << std::endl;
 }
-  
