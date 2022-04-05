@@ -1,0 +1,126 @@
+#include <filesystem>
+#include <fstream>
+#include <future>
+#include <iostream>
+#include <math.h>
+#include <random>
+#include <regex>
+#include <sstream>
+
+namespace fs = std::filesystem;
+
+double dist(double x, double y) { return sqrt(pow(x, 2) + pow(y, 2)); }
+
+double epsilon = 0.1;
+
+std::string generateTrianglePoints(std::default_random_engine &engine,
+                                   bool impostor) {
+  size_t minPointDistance =
+      2; // Ensures sufficient precision for angle to be 'quite' right
+
+  std::uniform_real_distribution<double> posDist(-21, 21);
+  double posX = posDist(engine);
+  double posY = posDist(engine);
+
+  double posX2 = posDist(engine);
+  double posY2 = posDist(engine);
+
+  while (dist(posX - posX2, posY - posY2) < minPointDistance) {
+    posX2 = posDist(engine);
+    posY2 = posDist(engine);
+  }
+
+  std::uniform_real_distribution<double> lengthDist(1, 2);
+  double side2 = lengthDist(engine);
+
+  double posX3 = posX2 + side2 * (posY - posY2);
+  double posY3 = posY2 + side2 * (posX2 - posX);
+
+  if (impostor) {
+    posX3 += 10; // what are the odds...
+  }
+
+  std::stringstream ss;
+  ss << "triangle["
+     << "(" << posX << "," << posY << "),";
+  ss << ""
+     << "(" << posX2 << "," << posY2 << "),";
+  ss << ""
+     << "(" << posX3 << "," << posY3 << ")]";
+  return ss.str();
+}
+
+void fillFile(fs::path root, std::default_random_engine &engine, int fileSize,
+              bool isSus) {
+
+  int susLine = -1; // Skip by default
+  std::ofstream file(root);
+
+  if (isSus) {
+    susLine = std::uniform_int_distribution<int>(0, fileSize - 1)(engine);
+  }
+
+  for (int j = 0; j < fileSize; ++j) {
+    if (j == susLine) {
+      std::cout << "Impostor: " << root << " \t file: " << root
+                << "\tline : " << j
+                << std::endl; // Helps to verify solution correctness
+    }
+    file << generateTrianglePoints(engine, j == susLine) << "\n";
+  }
+}
+
+void fillDirectoryWithFiles(fs::path root, int count, int triangleCount,
+                            std::default_random_engine &engine,
+                            int impostorFile) {
+  for (int i = 0; i < count; ++i) {
+    std::string filename = root / ("file" + std::to_string(i + 1) + ".txt");
+    fillFile(root / filename, engine, 1000, i == impostorFile);
+  }
+}
+
+void createRandomTree(fs::path root, std::default_random_engine &engine,
+                      size_t level, bool evil) {
+  int trianglesInFile = 10;
+  int filesInDir = 3;
+  int childDir = level;
+  int evilDir =
+      evil ? std::uniform_int_distribution<int>(-1, childDir - 1)(engine) : -1;
+  int evilFile =
+      (evil && evilDir == -1)
+          ? std::uniform_int_distribution<int>(0, filesInDir - 1)(engine)
+          : -1;
+
+  fillDirectoryWithFiles(root, filesInDir, trianglesInFile, engine, evilFile);
+
+  for (int i = 0; i < childDir; ++i) {
+    std::string dirName = (root / ("dir" + std::to_string(i)));
+    fs::create_directory(dirName);
+    createRandomTree(dirName, engine, level - 1, i == evilDir);
+  }
+}
+
+fs::path initializeEnvironment(const std::string &folder) {
+  std::default_random_engine engine(471576);
+  auto rootPath = fs::current_path() / folder;
+  fs::remove_all(rootPath);
+  fs::create_directory(rootPath);
+  createRandomTree(rootPath, engine, 3, true);
+  return rootPath;
+}
+
+// Zadanie trójkąty
+// Przeszukaj rekurencyjnie wygenerowany folder, w środku znajdują się pliki,
+// w każdym z nich znajduje się kilka linijek postaci triangle[(,),(,),(,)]
+// w sposób współbieżny znajdż plik ze skorumpowanym trójkątem -> takim który
+// nie jest prosty
+
+void exercise5() {
+  auto root = initializeEnvironment("fsroot");
+
+  // Miejsce na rozwiązanie
+}
+
+int main(){
+  exercise5();
+}
